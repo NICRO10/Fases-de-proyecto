@@ -1,0 +1,191 @@
+import java.util.*;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
+class Tarea {
+    String nombre;
+    String fechaLimite;
+    boolean completada;
+    String tipo; // Principal o Secundaria
+    String prioridad; // Alta, Media, Baja
+    Tarea siguiente; // Nodo siguiente
+
+    public Tarea(String nombre, String fechaLimite, String tipo, String prioridad) {
+        this.nombre = nombre;
+        this.fechaLimite = fechaLimite;
+        this.tipo = tipo;
+        this.prioridad = prioridad;
+        this.completada = false;
+        this.siguiente = null;
+    }
+
+    public void marcarComoCompletada() {
+        this.completada = true;
+    }
+
+    public String getEstado() {
+        return completada ? "Completada" : "Pendiente";
+    }
+
+    public boolean estaCercaDeVencer() {
+        try {
+            LocalDate hoy = LocalDate.now();
+            LocalDate fecha = LocalDate.parse(fechaLimite);
+            long dias = ChronoUnit.DAYS.between(hoy, fecha);
+            return dias <= 2 && dias >= 0 && !completada;
+        } catch (Exception e) {
+            System.out.println("⚠ Error al analizar la fecha de la tarea: " + nombre);
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        String alerta = estaCercaDeVencer() ? " ⚠ ¡Fecha próxima!" : "";
+        return "Tarea: " + nombre + " | Fecha límite: " + fechaLimite +
+               " | Tipo: " + tipo + " | Prioridad: " + prioridad +
+               " | Estado: " + getEstado() + alerta;
+    }
+}
+
+class GestorTareas {
+    private Tarea cabeza;
+
+    public GestorTareas() {
+        cabeza = null;
+    }
+
+    public void agregarTarea(String nombre, String fecha, String tipo, String prioridad) {
+        Tarea nueva = new Tarea(nombre, fecha, tipo, prioridad);
+        if (cabeza == null) {
+            cabeza = nueva;
+        } else {
+            Tarea actual = cabeza;
+            while (actual.siguiente != null) {
+                actual = actual.siguiente;
+            }
+            actual.siguiente = nueva;
+        }
+    }
+
+    public void mostrarTareas() {
+        if (cabeza == null) {
+            System.out.println("No hay tareas registradas.");
+            return;
+        }
+
+        Tarea actual = cabeza;
+        System.out.println("\n--- Lista de Tareas ---");
+        while (actual != null) {
+            System.out.println(actual);
+            actual = actual.siguiente;
+        }
+    }
+
+    public void completarTarea(String nombreTarea) {
+        Tarea actual = cabeza;
+        boolean encontrada = false;
+
+        while (actual != null) {
+            if (actual.nombre.equalsIgnoreCase(nombreTarea) && !actual.completada) {
+                actual.marcarComoCompletada();
+                System.out.println("Tarea completada: " + actual.nombre);
+                encontrada = true;
+                break;
+            }
+            actual = actual.siguiente;
+        }
+
+        if (!encontrada) {
+            System.out.println("No se encontró una tarea pendiente con ese nombre.");
+        }
+    }
+
+    public void mostrarAnalisisProductividad() {
+        int total = 0;
+        int completadas = 0;
+        Tarea actual = cabeza;
+
+        while (actual != null) {
+            total++;
+            if (actual.completada) {
+                completadas++;
+            }
+            actual = actual.siguiente;
+        }
+
+        if (total == 0) {
+            System.out.println("No hay tareas registradas para analizar.");
+        } else {
+            double porcentaje = (completadas * 100.0) / total;
+            System.out.printf("Tareas completadas: %d de %d (%.2f%% de productividad)%n", completadas, total, porcentaje);
+        }
+    }
+}
+
+public class SistemaGestionTareas {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        GestorTareas gestor = new GestorTareas();
+        int opcion = -1;
+
+        do {
+            try {
+                System.out.println("\n===============================");
+                System.out.println("     SISTEMA DE TAREAS - SOFTDEVS");
+                System.out.println("===============================");
+                System.out.println("1. Agregar nueva tarea");
+                System.out.println("2. Mostrar todas las tareas");
+                System.out.println("3. Completar tarea");
+                System.out.println("4. Ver análisis de productividad");
+                System.out.println("5. Salir");
+                System.out.print("Seleccione una opción: ");
+                opcion = scanner.nextInt();
+                scanner.nextLine(); // Limpiar buffer
+
+                switch (opcion) {
+                    case 1:
+                        System.out.print("Nombre de la tarea: ");
+                        String nombre = scanner.nextLine();
+                        System.out.print("Fecha límite (YYYY-MM-DD): ");
+                        String fecha = scanner.nextLine();
+                        System.out.print("Tipo (Principal/Secundaria): ");
+                        String tipo = scanner.nextLine();
+                        System.out.print("Prioridad (Alta/Media/Baja): ");
+                        String prioridad = scanner.nextLine();
+                        gestor.agregarTarea(nombre, fecha, tipo, prioridad);
+                        break;
+
+                    case 2:
+                        gestor.mostrarTareas();
+                        break;
+
+                    case 3:
+                        System.out.print("Ingrese el nombre de la tarea a completar: ");
+                        String nombreTarea = scanner.nextLine();
+                        gestor.completarTarea(nombreTarea);
+                        break;
+
+                    case 4:
+                        gestor.mostrarAnalisisProductividad();
+                        break;
+
+                    case 5:
+                        System.out.println("¡Hasta luego! Sigue organizando tus tareas :)");
+                        break;
+
+                    default:
+                        System.out.println("Opción inválida. Intente de nuevo.");
+                }
+
+            } catch (InputMismatchException e) {
+                System.out.println("⚠ Error: Debe ingresar un número. Intente de nuevo.");
+                scanner.nextLine(); // Limpiar entrada inválida
+                opcion = -1;
+            }
+
+        } while (opcion != 5);
+
+        scanner.close();
+    }
+}
