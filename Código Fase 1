@@ -1,0 +1,107 @@
+import java.util.*;
+
+class Tarea {
+    private String nombre;
+    private String fechaLimite;
+    private boolean completada;
+
+    public Tarea(String nombre, String fechaLimite) {
+        this.nombre = nombre;
+        this.fechaLimite = fechaLimite;
+        this.completada = false;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getFechaLimite() {
+        return fechaLimite;
+    }
+
+    public boolean isCompletada() {
+        return completada;
+    }
+
+    public void marcarComoCompletada() {
+        this.completada = true;
+    }
+
+    @Override
+    public String toString() {
+        return "Tarea: " + nombre + " | Fecha límite: " + fechaLimite + " | Estado: " + (completada ? "Completada" : "Pendiente");
+    }
+}
+
+class GestorTareas {
+    private Queue<Tarea> listaTareas;
+
+    public GestorTareas() {
+        listaTareas = new LinkedList<>();
+    }
+
+    public void agregarTarea(String nombre, String fechaLimite) {
+        listaTareas.offer(new Tarea(nombre, fechaLimite));
+    }
+
+    public void mostrarTareas() {
+        if (listaTareas.isEmpty()) {
+            System.out.println("No hay tareas registradas.");
+        } else {
+            for (Tarea tarea : listaTareas) {
+                System.out.println(tarea);
+            }
+        }
+    }
+
+    public void completarTarea() {
+        if (!listaTareas.isEmpty()) {
+            Tarea tarea = listaTareas.poll();
+            tarea.marcarComoCompletada();
+            System.out.println("Tarea completada: " + tarea.getNombre());
+        } else {
+            System.out.println("No hay tareas pendientes para completar.");
+        }
+    }
+}
+public class SistemaGestionTareas {
+	public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        GestorTareas gestor = new GestorTareas();
+        int opcion;
+
+        do {
+            System.out.println("\n--- Sistema de Gestión de Tareas ---");
+            System.out.println("1. Agregar Tarea");
+            System.out.println("2. Mostrar Tareas");
+            System.out.println("3. Completar Tarea");
+            System.out.println("4. Salir");
+            System.out.print("Seleccione una opción: ");
+            opcion = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (opcion) {
+                case 1:
+                    System.out.print("Ingrese el nombre de la tarea: ");
+                    String nombre = scanner.nextLine();
+                    System.out.print("Ingrese la fecha límite (YYYY-MM-DD): ");
+                    String fecha = scanner.nextLine();
+                    gestor.agregarTarea(nombre, fecha);
+                    break;
+                case 2:
+                    gestor.mostrarTareas();
+                    break;
+                case 3:
+                    gestor.completarTarea();
+                    break;
+                case 4:
+                    System.out.println("Saliendo del sistema...");
+                    break;
+                default:
+                    System.out.println("Opción no válida.");
+            }
+        } while (opcion != 4);
+
+        scanner.close();
+    }
+}
