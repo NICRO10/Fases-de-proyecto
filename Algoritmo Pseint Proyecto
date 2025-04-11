@@ -1,0 +1,69 @@
+Algoritmo Sistema_Gestion_Tarea
+	Definir nombreTarea, fechaLimite, tipo, prioridad Como Cadena
+    Definir estadoTarea Como Cadena
+    Definir opcion, totalTareas, tareasCompletadas Como Entero
+    totalTareas <- 0
+    tareasCompletadas <- 0
+	
+    Repetir
+        Escribir ""
+        Escribir "===== SISTEMA DE TAREAS - SOFTDEVS ====="
+        Escribir "1. Agregar nueva tarea"
+        Escribir "2. Mostrar tareas"
+        Escribir "3. Marcar tarea como completada"
+        Escribir "4. Ver análisis de productividad"
+        Escribir "5. Salir"
+        Escribir "Seleccione una opción:"
+        Leer opcion
+		
+        Segun opcion Hacer
+            1:
+                Escribir "Ingrese el nombre de la tarea:"
+                Leer nombreTarea
+                Escribir "Ingrese la fecha límite (ej: 2025-04-15):"
+                Leer fechaLimite
+                Escribir "Ingrese el tipo (Principal o Secundaria):"
+                Leer tipo
+                Escribir "Ingrese la prioridad (Alta, Media o Baja):"
+                Leer prioridad
+                estadoTarea <- "Pendiente"
+                totalTareas <- totalTareas + 1
+                Escribir "Tarea agregada exitosamente."
+				
+            2:
+                Si totalTareas = 0 Entonces
+                    Escribir "No hay tareas registradas."
+                Sino
+                    Escribir "Tarea: ", nombreTarea
+                    Escribir "Fecha límite: ", fechaLimite
+                    Escribir "Tipo: ", tipo
+                    Escribir "Prioridad: ", prioridad
+                    Escribir "Estado: ", estadoTarea
+                FinSi
+				
+            3:
+                Si estadoTarea = "Pendiente" Entonces
+                    estadoTarea <- "Completada"
+                    tareasCompletadas <- tareasCompletadas + 1
+                    Escribir "Tarea marcada como completada."
+                Sino
+                    Escribir "La tarea ya está completada o no existe."
+                FinSi
+				
+            4:
+                Si totalTareas = 0 Entonces
+                    Escribir "No hay tareas para analizar."
+                Sino
+                    porcentaje <- (tareasCompletadas * 100) / totalTareas
+                    Escribir "Tareas completadas: ", tareasCompletadas, " de ", totalTareas
+                    Escribir "Porcentaje de productividad: ", porcentaje, "%"
+                FinSi
+				
+            5:
+                Escribir "Gracias por usar el sistema de tareas."
+            De Otro Modo:
+                Escribir "Opción inválida. Intente nuevamente."
+        FinSegun
+		
+    Hasta Que opcion = 5
+Fin Algoritmo
