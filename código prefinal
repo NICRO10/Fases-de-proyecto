@@ -1,0 +1,341 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+
+// -------------- CLASE TAREA --------------
+class Tarea {
+    String descripcion;
+    String fecha;
+    String materia;
+    boolean completada;
+
+    Tarea(String descripcion, String fecha, String materia) {
+        this.descripcion = descripcion;
+        this.fecha = fecha;
+        this.materia = materia;
+        this.completada = false;
+    }
+
+    @Override
+    public String toString() {
+        return (completada ? "✔️ " : "🔹 ") + fecha + " - " + descripcion + " (" + materia + ")";
+    }
+
+    public boolean estaVencida() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy");
+        try {
+            Date fechaTarea = sdf.parse(this.fecha);
+            return fechaTarea.before(new Date()) && !completada;
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+}
+
+// -------------- CLASE GESTOR DE TAREAS --------------
+class GestorTareas {
+    private ArrayList<Tarea> tareas = new ArrayList<>();
+
+    void agregarTarea(String descripcion, String fecha, String materia) {
+        tareas.add(new Tarea(descripcion, fecha, materia));
+    }
+
+    ArrayList<Tarea> obtenerTareasPendientes() {
+        ArrayList<Tarea> pendientes = new ArrayList<>();
+        for (Tarea t : tareas) {
+            if (!t.completada) {
+                pendientes.add(t);
+            }
+        }
+        return pendientes;
+    }
+
+    ArrayList<Tarea> obtenerTareasCompletadas() {
+        ArrayList<Tarea> completadas = new ArrayList<>();
+        for (Tarea t : tareas) {
+            if (t.completada) {
+                completadas.add(t);
+            }
+        }
+        return completadas;
+    }
+
+    ArrayList<Tarea> obtenerTareasVencidas() {
+        ArrayList<Tarea> vencidas = new ArrayList<>();
+        for (Tarea t : tareas) {
+            if (t.estaVencida()) {
+                vencidas.add(t);
+            }
+        }
+        return vencidas;
+    }
+
+    void completarTarea(Tarea tarea) {
+        tarea.completada = true;
+    }
+
+    void eliminarTarea(Tarea tarea) {
+        tareas.remove(tarea);
+    }
+
+    ArrayList<Tarea> obtenerTodasLasTareas() {
+        return new ArrayList<>(tareas);
+    }
+}
+
+// -------------- CLASE PRINCIPAL (INTERFAZ GRÁFICA) --------------
+public class SistemaGestionTareasConGUI {
+    private static HashMap<String, String> usuarios = new HashMap<>();
+    private static boolean estaLogueado = false;
+
+    public static void main(String[] args) {
+        usuarios.put("admin", "1234");
+
+        JFrame frame = new JFrame("Gestor de Tareas");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+        frame.setLayout(new BorderLayout());
+
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new GridLayout(8, 1, 10, 10));
+        menuPanel.setBackground(new Color(240, 240, 240));
+
+        JButton btnIngresar = new JButton("🔑 Ingresar");
+        btnIngresar.addActionListener(e -> {
+            if (!estaLogueado) {
+                mostrarVentanaLogin();
+            } else {
+                JOptionPane.showMessageDialog(null, "Ya estás logueado.");
+            }
+        });
+
+        JButton btnAcercaDe = new JButton("ℹ️ Acerca de");
+        btnAcercaDe.addActionListener(e -> mostrarAcercaDe());
+
+        JButton btnSalir = new JButton("🚪 Salir");
+        btnSalir.addActionListener(e -> System.exit(0));
+
+        menuPanel.add(btnIngresar);
+        menuPanel.add(btnAcercaDe);
+        menuPanel.add(btnSalir);
+
+        frame.add(menuPanel, BorderLayout.CENTER);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static void mostrarVentanaLogin() {
+        JFrame loginFrame = new JFrame("Login");
+        loginFrame.setSize(300, 200);
+        loginFrame.setLayout(new GridLayout(3, 2));
+
+        JLabel lblUsuario = new JLabel("Usuario:");
+        JTextField txtUsuario = new JTextField();
+        JLabel lblContraseña = new JLabel("Contraseña:");
+        JPasswordField txtContraseña = new JPasswordField();
+
+        JButton btnIngresar = new JButton("Ingresar");
+        btnIngresar.addActionListener(e -> {
+            String usuario = txtUsuario.getText();
+            String contrasena = new String(txtContraseña.getPassword());
+
+            if (usuarios.containsKey(usuario) && usuarios.get(usuario).equals(contrasena)) {
+                JOptionPane.showMessageDialog(null, "Ingreso exitoso.");
+                estaLogueado = true;
+                loginFrame.dispose();
+                mostrarVentanaPrincipal();
+            } else {
+                JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos.");
+            }
+        });
+
+        loginFrame.add(lblUsuario);
+        loginFrame.add(txtUsuario);
+        loginFrame.add(lblContraseña);
+        loginFrame.add(txtContraseña);
+        loginFrame.add(btnIngresar);
+
+        loginFrame.setLocationRelativeTo(null);
+        loginFrame.setVisible(true);
+    }
+
+    private static void mostrarVentanaPrincipal() {
+        JFrame frame = new JFrame("Gestor de Tareas");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+        frame.setLayout(new BorderLayout());
+
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new GridLayout(8, 1, 10, 10));
+        menuPanel.setBackground(new Color(240, 240, 240));
+
+        GestorTareas gestor = new GestorTareas();
+
+        JButton btnAgregar = new JButton("📝 Agregar tarea");
+        btnAgregar.addActionListener(e -> mostrarDialogoDatosTarea(null, gestor, null));
+
+        JButton btnMostrar = new JButton("📋 Mostrar tareas");
+        btnMostrar.addActionListener(e -> {
+            JFrame ventanaMostrar = new JFrame("Lista de Tareas");
+            ventanaMostrar.setSize(500, 400);
+            ventanaMostrar.setLayout(new BorderLayout());
+
+            DefaultListModel<Tarea> modeloLista = new DefaultListModel<>();
+            for (Tarea t : gestor.obtenerTodasLasTareas()) {
+                modeloLista.addElement(t);
+            }
+
+            JList<Tarea> listaTareas = new JList<>(modeloLista);
+            listaTareas.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JScrollPane scroll = new JScrollPane(listaTareas);
+            ventanaMostrar.add(scroll, BorderLayout.CENTER);
+
+            JPanel panelBotones = new JPanel(new FlowLayout());
+
+            JButton btnCompletar = new JButton("✅ Completar");
+            JButton btnEliminar = new JButton("❌ Eliminar");
+            JButton btnEditar = new JButton("✏️ Editar");
+
+            btnCompletar.addActionListener(ev -> {
+                Tarea seleccionada = listaTareas.getSelectedValue();
+                if (seleccionada != null) {
+                    gestor.completarTarea(seleccionada);
+                    modeloLista.setElementAt(seleccionada, modeloLista.indexOf(seleccionada));
+                } else {
+                    JOptionPane.showMessageDialog(null, "Seleccione una tarea para completar.");
+                }
+            });
+
+            btnEliminar.addActionListener(ev -> {
+                Tarea seleccionada = listaTareas.getSelectedValue();
+                if (seleccionada != null) {
+                    gestor.eliminarTarea(seleccionada);
+                    modeloLista.removeElement(seleccionada);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Seleccione una tarea para eliminar.");
+                }
+            });
+
+            btnEditar.addActionListener(ev -> {
+                Tarea seleccionada = listaTareas.getSelectedValue();
+                if (seleccionada != null) {
+                    mostrarDialogoDatosTarea(seleccionada, gestor, modeloLista);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Seleccione una tarea para editar.");
+                }
+            });
+
+            panelBotones.add(btnCompletar);
+            panelBotones.add(btnEliminar);
+            panelBotones.add(btnEditar);
+
+            ventanaMostrar.add(panelBotones, BorderLayout.SOUTH);
+            ventanaMostrar.setLocationRelativeTo(null);
+            ventanaMostrar.setVisible(true);
+        });
+
+        JButton btnEstadoTareas = new JButton("📊 Estado de tareas");
+        btnEstadoTareas.addActionListener(e -> {
+            JFrame ventanaEstadoTareas = new JFrame("Estado de Tareas");
+            ventanaEstadoTareas.setSize(500, 400);
+            ventanaEstadoTareas.setLayout(new FlowLayout());
+
+            JButton btnVencidas = new JButton("📅 Tareas vencidas");
+            JButton btnPendientes = new JButton("📋 Tareas pendientes");
+            JButton btnCompletadas = new JButton("✅ Tareas completadas");
+
+            btnVencidas.addActionListener(ev -> {
+                StringBuilder vencidas = new StringBuilder();
+                for (Tarea t : gestor.obtenerTareasVencidas()) {
+                    vencidas.append(t).append("\n");
+                }
+                JOptionPane.showMessageDialog(null, vencidas.length() > 0 ? vencidas.toString() : "No hay tareas vencidas.");
+            });
+
+            btnPendientes.addActionListener(ev -> {
+                StringBuilder pendientes = new StringBuilder();
+                for (Tarea t : gestor.obtenerTareasPendientes()) {
+                    pendientes.append(t).append("\n");
+                }
+                JOptionPane.showMessageDialog(null, pendientes.length() > 0 ? pendientes.toString() : "No hay tareas pendientes.");
+            });
+
+            btnCompletadas.addActionListener(ev -> {
+                StringBuilder completadas = new StringBuilder();
+                for (Tarea t : gestor.obtenerTareasCompletadas()) {
+                    completadas.append(t).append("\n");
+                }
+                JOptionPane.showMessageDialog(null, completadas.length() > 0 ? completadas.toString() : "No hay tareas completadas.");
+            });
+
+            ventanaEstadoTareas.add(btnVencidas);
+            ventanaEstadoTareas.add(btnPendientes);
+            ventanaEstadoTareas.add(btnCompletadas);
+
+            ventanaEstadoTareas.setLocationRelativeTo(null);
+            ventanaEstadoTareas.setVisible(true);
+        });
+
+        JButton btnSalir = new JButton("🚪 Salir");
+        btnSalir.addActionListener(e -> System.exit(0));
+
+        menuPanel.add(btnAgregar);
+        menuPanel.add(btnMostrar);
+        menuPanel.add(btnEstadoTareas);
+        menuPanel.add(btnSalir);
+
+        frame.add(menuPanel, BorderLayout.CENTER);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    private static void mostrarDialogoDatosTarea(Tarea tareaEditar, GestorTareas gestor, DefaultListModel<Tarea> modeloLista) {
+        JTextField txtDescripcion = new JTextField(tareaEditar != null ? tareaEditar.descripcion : "");
+        JTextField txtFecha = new JTextField(tareaEditar != null ? tareaEditar.fecha : "");
+        JTextField txtMateria = new JTextField(tareaEditar != null ? tareaEditar.materia : "");
+
+        JPanel panel = new JPanel(new GridLayout(3, 2));
+        panel.add(new JLabel("Descripción:"));
+        panel.add(txtDescripcion);
+        panel.add(new JLabel("Fecha (dd-mm-aa):"));
+        panel.add(txtFecha);
+        panel.add(new JLabel("Materia:"));
+        panel.add(txtMateria);
+
+        int resultado = JOptionPane.showConfirmDialog(null, panel, tareaEditar == null ? "Agregar Tarea" : "Editar Tarea", JOptionPane.OK_CANCEL_OPTION);
+        if (resultado == JOptionPane.OK_OPTION) {
+            String descripcion = txtDescripcion.getText();
+            String fecha = txtFecha.getText();
+            String materia = txtMateria.getText();
+
+            if (descripcion.isEmpty() || fecha.isEmpty() || materia.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Todos los campos son obligatorios.");
+                return;
+            }
+
+            if (tareaEditar == null) {
+                gestor.agregarTarea(descripcion, fecha, materia);
+            } else {
+                tareaEditar.descripcion = descripcion;
+                tareaEditar.fecha = fecha;
+                tareaEditar.materia = materia;
+                if (modeloLista != null) {
+                    modeloLista.setElementAt(tareaEditar, modeloLista.indexOf(tareaEditar));
+                }
+            }
+        }
+    }
+
+    private static void mostrarAcercaDe() {
+        JOptionPane.showMessageDialog(null,
+                "Sistema de Gestión de Tareas\nVersión 1.0\nDesarrollado por: Juan Nicolás Duarte\nInstitución: Politécnico");
+    }
+}
+
+
+
