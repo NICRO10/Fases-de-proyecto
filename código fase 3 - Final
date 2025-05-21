@@ -89,7 +89,7 @@ class GestorTareas {
 }
 
 // -------------- CLASE PRINCIPAL (INTERFAZ GRÁFICA) --------------
-public class SistemaGestionTareasConGUI {
+public class SistemaGestionTareas {
     private static HashMap<String, String> usuarios = new HashMap<>();
     private static boolean estaLogueado = false;
 
@@ -177,9 +177,13 @@ public class SistemaGestionTareasConGUI {
         GestorTareas gestor = new GestorTareas();
 
         JButton btnAgregar = new JButton("📝 Agregar tarea");
+        btnAgregar.setBackground(new Color(52, 152, 219)); // Azul Dodger
+        btnAgregar.setForeground(Color.WHITE); // Texto blanco
         btnAgregar.addActionListener(e -> mostrarDialogoDatosTarea(null, gestor, null));
 
         JButton btnMostrar = new JButton("📋 Mostrar tareas");
+        btnAgregar.setBackground(new Color(52, 152, 219)); // Azul Dodger
+        btnAgregar.setForeground(Color.WHITE); // Texto blanco
         btnMostrar.addActionListener(e -> {
             JFrame ventanaMostrar = new JFrame("Lista de Tareas");
             ventanaMostrar.setSize(500, 400);
@@ -198,9 +202,14 @@ public class SistemaGestionTareasConGUI {
             JPanel panelBotones = new JPanel(new FlowLayout());
 
             JButton btnCompletar = new JButton("✅ Completar");
+            btnCompletar.setBackground(new Color(52, 152, 219)); // Azul Dodger
+            btnCompletar.setForeground(Color.BLACK); // Texto blanco
             JButton btnEliminar = new JButton("❌ Eliminar");
+            btnEliminar.setBackground(new Color(220, 20, 60)); // Azul Dodger
+            btnEliminar.setForeground(Color.BLACK); // Texto blanco
             JButton btnEditar = new JButton("✏️ Editar");
-
+            btnEditar.setBackground(new Color(60, 179, 113)); // Azul Dodger
+            btnEditar.setForeground(Color.BLACK); // Texto blanco
             btnCompletar.addActionListener(ev -> {
                 Tarea seleccionada = listaTareas.getSelectedValue();
                 if (seleccionada != null) {
@@ -246,8 +255,14 @@ public class SistemaGestionTareasConGUI {
             ventanaEstadoTareas.setLayout(new FlowLayout());
 
             JButton btnVencidas = new JButton("📅 Tareas vencidas");
+            btnAgregar.setBackground(new Color(220, 20, 60)); 
+            btnAgregar.setForeground(Color.BLACK); 
             JButton btnPendientes = new JButton("📋 Tareas pendientes");
+            btnAgregar.setBackground(new Color(72, 61, 139)); 
+            btnAgregar.setForeground(Color.BLACK); 
             JButton btnCompletadas = new JButton("✅ Tareas completadas");
+            btnAgregar.setBackground(new Color(60, 179, 113)); 
+            btnAgregar.setForeground(Color.BLACK); 
 
             btnVencidas.addActionListener(ev -> {
                 StringBuilder vencidas = new StringBuilder();
@@ -280,13 +295,27 @@ public class SistemaGestionTareasConGUI {
             ventanaEstadoTareas.setLocationRelativeTo(null);
             ventanaEstadoTareas.setVisible(true);
         });
-
+        
+        JButton btnProductividad = new JButton("📊 Productividad");
+        btnProductividad.addActionListener(e -> {
+        	  btnAgregar.setBackground(new Color(60, 179, 113)); // Azul Dodger
+              btnAgregar.setForeground(Color.WHITE); // Texto blanco
+            int totalTareas = gestor.obtenerTodasLasTareas().size();
+            int tareasCompletadas = gestor.obtenerTareasCompletadas().size();
+            double productividad = totalTareas > 0 ? (double) tareasCompletadas / totalTareas * 100 : 0;
+            JOptionPane.showMessageDialog(null, "Tu productividad es: " + String.format("%.2f", productividad) + "%");
+        });
+            
+            
+           
+           
         JButton btnSalir = new JButton("🚪 Salir");
         btnSalir.addActionListener(e -> System.exit(0));
 
         menuPanel.add(btnAgregar);
         menuPanel.add(btnMostrar);
         menuPanel.add(btnEstadoTareas);
+        menuPanel.add(btnProductividad);
         menuPanel.add(btnSalir);
 
         frame.add(menuPanel, BorderLayout.CENTER);
@@ -301,10 +330,13 @@ public class SistemaGestionTareasConGUI {
 
         JPanel panel = new JPanel(new GridLayout(3, 2));
         panel.add(new JLabel("Descripción:"));
+        panel.setBackground(new Color(100, 150, 200, 128));
         panel.add(txtDescripcion);
         panel.add(new JLabel("Fecha (dd-mm-aa):"));
+        panel.setBackground(new Color(100, 150, 200, 128));
         panel.add(txtFecha);
         panel.add(new JLabel("Materia:"));
+        panel.setBackground(new Color(100, 150, 200, 128));
         panel.add(txtMateria);
 
         int resultado = JOptionPane.showConfirmDialog(null, panel, tareaEditar == null ? "Agregar Tarea" : "Editar Tarea", JOptionPane.OK_CANCEL_OPTION);
@@ -333,7 +365,7 @@ public class SistemaGestionTareasConGUI {
 
     private static void mostrarAcercaDe() {
         JOptionPane.showMessageDialog(null,
-                "Sistema de Gestión de Tareas\nVersión 1.0\nDesarrollado por: Juan Nicolás Duarte\nInstitución: Politécnico");
+                "Sistema de Gestión de Tareas\nVersión 1.0\nDesarrollado por: Juan Nicolás Duarte\nInstitución: Politécnico Grancolombiano");
     }
 }
 
